@@ -2,13 +2,19 @@ const express = require("express");
 const fs = require("fs");
 const cors = require("cors");
 const exec = require("child_process").execFile;
+const morgan = require("morgan");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
+app.set("port", process.env.PORT || 8001);
+if (process.env.NODE_ENV === "production") {
+  app.use(morgan("combined"));
+} else {
+  app.use(morgan("dev"));
+}
 //input fileName and req.body data will make res to client
 const makeResponse = async (fileName, data, res) => {
   await fs.writeFile(`${fileName}.in`, data, (err) => {
@@ -74,6 +80,6 @@ app.post("/bot", async (req, res) => {
   }
 });
 
-app.listen(3000, () => {
-  console.log("server is running on port: 3000");
+app.listen(app.get("port"), () => {
+  console.log(app.get("port"), "번 포트에서 대기 중");
 });
