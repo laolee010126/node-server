@@ -15,6 +15,7 @@ if (process.env.NODE_ENV === "production") {
 } else {
   app.use(morgan("dev"));
 }
+
 //input fileName and req.body data will make res to client
 const makeResponse = async (fileName, data, res) => {
   await fs.writeFile(`${fileName}.in`, data, (err) => {
@@ -23,6 +24,7 @@ const makeResponse = async (fileName, data, res) => {
       console.log(`${fileName}.exe is excecuted`);
       fs.readFile(`${fileName}.out`, (err, data) => {
         const output = data.toString();
+        console.log(output);
         res.json({ data: output });
       });
     });
@@ -35,7 +37,8 @@ const makeBotResponse = async (bot, data, res) => {
     exec(`${bot}.exe`, () => {
       console.log(`${bot}.exe is excecuted`);
       fs.readFile(`bot.out`, (err, data) => {
-        const output = data.toString();
+        let output = data.toString();
+        output = output.replace(/\s/g, "");
         res.json({ data: output });
       });
     });
@@ -58,6 +61,7 @@ app.post("/panduan", async (req, res) => {
 // send back output
 app.post("/shengfu", async (req, res) => {
   const { data } = req.body;
+  console.log(data);
   if (fs.existsSync("shengfu.in")) {
     //if file exist, delete first
     fs.unlink("shengfu.in", () => {
@@ -78,6 +82,10 @@ app.post("/bot", async (req, res) => {
   } else {
     makeBotResponse(bot, data, res);
   }
+});
+
+app.post("/test", async (req, res) => {
+  res.json({ data: "Hello" });
 });
 
 app.listen(app.get("port"), () => {
